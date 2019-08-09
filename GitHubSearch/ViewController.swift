@@ -52,6 +52,7 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         
         let cell : UserInfoTableViewCell = tableView.dequeueReusableCell(withIdentifier: indentify, for: indexPath) as! UserInfoTableViewCell
 
+        // 创建单元格的时候请求该用户常用语言
         if (self.listDataArray![indexPath.row]["language"] == nil) {
             self.searchUserBestLanguageWithUserName(self.listDataArray![indexPath.row]["userName"] as! String , indexPath.row)
         }
@@ -79,15 +80,17 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     /// - Parameter userName: 用户名
     func searUserInfoWithName(_ userName : String) -> Void {
         
-        
+        // 网太烂了,限制每次只请求10条数据
         let url : String = "https://api.github.com/search/users?q=" + userName + "&page=1&per_page=10"
         
         APIClient.shareAPIClient.requestJsonData(url, method: .get) { (responseData, error) in
             
             
             if responseData != nil {
+                
                 let response = responseData as! [String:Any]
-                let userListArray :Array<Dictionary<String, Any>> = (response["items"] as! Array<Dictionary<String, Any>>)
+                
+                let userListArray :Array<Dictionary<String, Any>> = (response["items"] as? Array<Dictionary<String, Any>>)!
 
                 self.listDataArray?.removeAll()
                 for i in 0..<userListArray.count {
@@ -115,20 +118,21 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     ///
     /// - Parameter userName: 用户名
     func searchUserBestLanguageWithUserName(_ userName : String, _ index : Int) -> Void {
-        
-        if (index >= (self.listDataArray?.count)!) {
+        // 此处判断index是否有效
+        if (index >= (self.listDataArray?.count)! && (self.listDataArray?.count)! > 0) {
             return
         }
         let url : String = "https://api.github.com/users/" + userName + "/repos"
         APIClient.shareAPIClient.requestJsonData(url, method: .get) { (responseData, error) in
             
-            if responseData != nil {
-                let response :Array<Dictionary<String,Any>> = responseData as! Array<Dictionary<String,Any>>
+            if responseData != nil && !responseData.debugDescription.contains("documentation_url"){
+            
+                let response :Array<Any> = responseData as! Array<Any>
                 
                 // 遍历请求结果得到用户使用的语言数组
                 var languageArray : Array<String> = []
                 for i in 0..<response.count {
-                    let dict = response[i]
+                    let dict = response[i] as! Dictionary<String,Any>
                     
                     let str = dict["language"] as? String
                     

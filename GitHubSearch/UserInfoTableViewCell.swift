@@ -12,7 +12,6 @@ import Kingfisher
 class UserInfoTableViewCell: UITableViewCell {
 
     @IBOutlet weak var userHeaderImageView: UIImageView!
-    
     @IBOutlet weak var userBestLanguageLabel: UILabel!
     @IBOutlet weak var userNameLabel: UILabel!
     
@@ -21,6 +20,7 @@ class UserInfoTableViewCell: UITableViewCell {
         // Initialization code
     }
 
+    // 给cell赋值
     public func setCellData(_ data : Dictionary<String,Any> , _ indexPath : IndexPath) -> Void {
         
         self.userNameLabel.text = (data["userName"] as! String)
